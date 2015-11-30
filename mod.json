@@ -1,0 +1,10 @@
+{
+  "name": "more-self-switches",
+  "version": "1.0.0",
+  "description": "Add more self switches",
+  "dependencies": {
+    "essentials": ">=1.0.0"
+  },
+  "author": "orzFly",
+  "homepage": "https://github.com/orzFly/RMMVMod"
+}
