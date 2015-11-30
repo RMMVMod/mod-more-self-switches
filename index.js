@@ -11,26 +11,63 @@ var qml = ModAPI.QMLFile("Controls/SelfSwitchBox.qml")
 var node = qml.root.node
 
 node.describe = "LabeledEditableComboBox"
-node.publicMember("currentCharacter").statement = "editText"
-node.object("model", "['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']")
+node.publicMember("currentCharacter").statement = "model.get(currentIndex).name"
+node.object("model", "ListModel { id: listModel }")
+node.object("textRole", '"name"')
+
 node.object("onEditTextChanged", [
   '{',
   '    var character = editText;',
+  '    setCharacter(character, true);',
   '    if (member.length && DataManager.setObjectValue(object, member, character)) {',
   '        helper.setModified();',
   '        modified();',
   '    }',
   '}',
 ].join("\n"))
+
+node.object("onCurrentIndexChanged", [
+  '{',
+  '    var character = model.get(currentIndex).name.toString();',
+  '    if (member.length && DataManager.setObjectValue(object, member, character)) {',
+  '        helper.setModified();',
+  '        modified();',
+  '    }',
+  '}',
+].join("\n"))
+
+node.object("Component.onCompleted", [
+  '{',
+  '    initModel();',
+  '}',
+].join("\n"))
+
 node.function("setCharacter", [
-  'function setCharacter(character) {',
-  '    for (var i = 0; i < model.length; i++) {',
-  '        if (model[i] === character) {',
-  '            currentIndex = i;',
-  '            break;',
+  'function setCharacter(character, notForce) {',
+  '    initModel();',
+  '    if (!notForce) currentIndex = 0;',
+  '    for (var i = 0; i < model.count; i++) {',
+  '        if (model.get(i).name === character) {',
+  '            if (!notForce || (notForce && currentIndex !== i)) currentIndex = i;',
+  '            return;',
   '        }',
   '    }',
-  '    editText = character;',
+  '    if (!model.get(model.count - 1).input) {',
+  '        model.append({"name": "", "input": true});',
+  '    }',
+  '    model.get(model.count - 1).name = character;',
+  '    if (!notForce || (notForce && currentIndex !== model.count - 1)) currentIndex = model.count - 1;',
+  '}',
+].join("\n"))
+
+var x = node.function("initModel", [
+  'function initModel() {',
+  '    if (model.count == 0) {',
+  '        model.append({"name": "A"});',
+  '        model.append({"name": "B"});',
+  '        model.append({"name": "C"});',
+  '        model.append({"name": "D"});',
+  '    }',
   '}',
 ].join("\n"))
 
