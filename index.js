@@ -7,15 +7,15 @@ var readLocalFile = function(name) {
   return fs.readFileSync(path.join(__dirname, name))
 }
 
-var qml = ModAPI.QMLFile("Controls/SelfSwitchBox.qml")
-var node = qml.root.node
+var qml = ModAPI.QMLFileV2("Controls/SelfSwitchBox.qml")
+var node = qml.root
 
-node.describe = "LabeledEditableComboBox"
-node.publicMember("currentCharacter").statement = "model.get(currentIndex).name"
-node.object("model", "ListModel { id: listModel }")
-node.object("textRole", '"name"')
+node.type = "LabeledEditableComboBox"
+node.set("currentCharacter", "model.get(currentIndex).name")
+node.set("model", ModAPI.QMLCompileV2("ListModel { id: listModel }"))
+node.set("textRole", '"name"')
 
-node.object("onEditTextChanged", [
+node.set("onEditTextChanged", [
   '{',
   '    var character = editText;',
   '    setCharacter(character, true);',
@@ -26,7 +26,7 @@ node.object("onEditTextChanged", [
   '}',
 ].join("\n"))
 
-node.object("onCurrentIndexChanged", [
+node.set("onCurrentIndexChanged", [
   '{',
   '    var character = model.get(currentIndex).name.toString();',
   '    if (member.length && DataManager.setObjectValue(object, member, character)) {',
@@ -36,13 +36,13 @@ node.object("onCurrentIndexChanged", [
   '}',
 ].join("\n"))
 
-node.object("Component.onCompleted", [
+node.set("Component.onCompleted", [
   '{',
   '    initModel();',
   '}',
 ].join("\n"))
 
-node.function("setCharacter", [
+node.def("setCharacter", "Function", [
   'function setCharacter(character, notForce) {',
   '    initModel();',
   '    if (!notForce) currentIndex = 0;',
@@ -60,7 +60,7 @@ node.function("setCharacter", [
   '}',
 ].join("\n"))
 
-var x = node.function("initModel", [
+var x = node.def("initModel", "Function", [
   'function initModel() {',
   '    if (model.count == 0) {',
   '        model.append({"name": "A"});',
